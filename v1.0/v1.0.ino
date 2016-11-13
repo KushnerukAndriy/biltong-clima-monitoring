@@ -11,7 +11,6 @@ LiquidCrystal_I2C lcd(0x27, 20, 4); // Виставляємо адрасе ек�
 DHT dht(DHTPIN, DHTTYPE); // Задаємо датчик
 void setup()
 {
-	Serial.begin(9600); // Швидкість серіал порта 
   dht.begin(); // вмикаємо датчик температури
 	lcd.begin(); // вмикаємо екран
 	lcd.backlight(); // вмикаємо підсвітку 
@@ -28,12 +27,6 @@ void loop()
     Serial.println("Failed to read from DHT"); 
   } 
   else { 
-    Serial.print("Humidity: "); 
-    Serial.print(h); 
-    Serial.print(" %\t"); 
-    Serial.print("Temperature: "); 
-    Serial.print(t); 
-    Serial.println(" *C"); 
     lcd.setCursor(0, 1);
     lcd.print("t = ");
     lcd.print(t);
