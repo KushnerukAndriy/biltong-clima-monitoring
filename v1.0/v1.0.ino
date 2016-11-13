@@ -1,26 +1,22 @@
-#include <Wire.h> 
+#include <LiquidCrystal.h>
 #include <LiquidCrystal_I2C.h>
 #include <DHT.h>
+#include <Wire.h> 
 
-#define DHTPIN 2 
-#define DHTTYPE DHT22
+#define DHTPIN 2 // Пін для датчика температури
+#define DHTTYPE DHT22 // Тип датчика температури
 
-// Set the LCD address to 0x27 for a 16 chars and 2 line display
-LiquidCrystal_I2C lcd(0x27, 20, 4);
-DHT dht(DHTPIN, DHTTYPE);
+LiquidCrystal_I2C lcd(0x27, 20, 4); // Виставляємо адрасе екрану і  тип
 
+DHT dht(DHTPIN, DHTTYPE); // Задаємо датчик
 void setup()
 {
-	// initialize the SERIAL PORT
-	Serial.begin(9600); 
-  Serial.println("DHTxx test!");
-  dht.begin(); 
-	// initialize the LCD
-	lcd.begin();
-	// Turn on the blacklight and print a message.
-	lcd.backlight();
-  lcd.setCursor(6, 0);
-	lcd.print("TEST");
+	Serial.begin(9600); // Швидкість серіал порта 
+  dht.begin(); // вмикаємо датчик температури
+	lcd.begin(); // вмикаємо екран
+	lcd.backlight(); // вмикаємо підсвітку 
+  lcd.setCursor(1, 0); // загальга назва 
+	lcd.print("Biltong Monitoring"); //  напис
 }
 
 void loop()
