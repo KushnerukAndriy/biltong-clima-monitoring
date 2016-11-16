@@ -1,11 +1,5 @@
-#include <LiquidCrystal.h>
-#include <LiquidCrystal_I2C.h>
-#include <DHT.h>
-#include <Wire.h> 
-#include <stDHT.h>
-
-DHT sens(DHT21); // Указать датчик DHT11, DHT21 или DHT22. (несколько датчиков вписывать не нужно)
-// Подключать можно только одинаковые датчики, то есть нельзя использовать одновременно DHT11 и DHT22
+#include "stDHT.h"
+DHT sens(DHT22); // Указать датчик DHT11, DHT21, DHT22
 
 void setup() 
 {
@@ -39,3 +33,4 @@ void loop()
   Serial.print(t2);
   Serial.println(" C "); 
 }
+
