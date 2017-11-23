@@ -1,10 +1,13 @@
 # biltong-clima-monitoring
 
+Adresses:
+0x44 -- temp and hum
+0x68 -- rtc
 
 You need:
 - <Nextion.h> https://github.com/bborncr/nextion
 - <iarduino_RTC.h> //http://iarduino.ru/file/235.html --- http://wiki.iarduino.ru/page/chasy-realnogo-vremeni-rtc-trema-modul/
-
+- https://github.com/adafruit/Adafruit_SHT31
 
 Commands frome display:
 - ventilation
