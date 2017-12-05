@@ -3,7 +3,6 @@
 #include <Wire.h>
 #include "RTClib.h"
 #include "Adafruit_SHT31.h"
-//#include <Arduino.h>
 
 SoftwareSerial nextion(3, 2);
 Nextion myNextion(nextion, 9600);
@@ -34,14 +33,15 @@ void setup() {
   }
   else {
     Serial.println("RTC SHT31 --- OK");
+    rtc.adjust(DateTime(2017, 1, 21, 3, 0, 0));
   }
 
   myNextion.init();
   refTime = rtc.now().unixtime();
   configs[0] = new int[3] {1, 0, 0};
-  configs[1] = new int[5] {2, 6, 1, 24, 0}; // mode number, time1, value1, time2, value2
+  configs[1] = new int[5] {2, 6, 1, 24, 0}; // _______, time1, value1, time2, value2
   configs[2] = new int[5] {2, 6, 1, 12, 0}; 
-  configs[3] = new int[3] {1, 0, 95};
+  configs[3] = new int[3] {1, 0, 1};
   
   pinMode(CH1, OUTPUT);
   pinMode(CH2, OUTPUT);
@@ -61,12 +61,16 @@ void setupFan(int* currentConfig) {
   uint32_t currentVoltage = currentConfig[1 + refIndex * 2 + 1];
   
   uint32_t refDiff = currentTime - refTime;
+  Serial.println(refDiff);
+  Serial.println(currentDelay);
+  Serial.println(currentVoltage);;
+  
   if(refDiff >= currentDelay) {
     refIndex++;
     if(refIndex >= arrSize) refIndex = 0;
     refTime = currentTime;
   }
-  digitalWrite(CH1, 1);
+  digitalWrite(CH1, currentVoltage);
 }
 
 void loop () {
@@ -81,22 +85,12 @@ void loop () {
   if ( (! isnan(t)) and (! isnan(h)) ) {
    myNextion.setComponentText("t0", String(t));
    myNextion.setComponentText("t1", String(h));
-   Serial.println( t);
-   Serial.println( h);
+   //Serial.println( t);
+   //Serial.println( h);
   } 
   else { 
    Serial.println("Failed to read temperature");
   }
   setupFan(configs[1]);
 }
-
-
-//  
-//  if ( message == "vt0" ) currentConfigIndex = 1;
-//  if ( message == "vt1" ) currentConfigIndex = 2;
-//  if ( message == "vt2" ) currentConfigIndex = 3;
-//  if ( message == "vt4" ) currentConfigIndex = 0;
-//
-//  setupFan(configs[currentConfigIndex]);
-//
 
