@@ -16,6 +16,7 @@ uint32_t refIndex = 0;
 int* currentConfig;
 int currentConfigIndex = 0;
 int cycle = 0;
+int lampStatus = 0;
 // Default status
 String humMode = "hy0";
 String ventMode = "vt0";
@@ -121,10 +122,10 @@ void lamp(String str) {
 
 void sendStatus(int i) {
   if ( i == 3) {
-    myNextion.setComponentText("other.hy_txt", String(humMode));
+    myNextion.setComponentText("other.lt_txt", String(humMode));
   }
   else if ( i == 5 ) {
-    myNextion.setComponentText("other.hy_txt", String(ventMode));
+    myNextion.setComponentText("other.lt_txt", String(ventMode));
   }
   else if ( i == 7 ) {
     myNextion.setComponentText("other.lt_txt", String(lampMode));
@@ -199,6 +200,16 @@ void loop () {
   // INIT
   String message = myNextion.listen();
   DateTime now = rtc.now();
+  Serial.print(now.hour(), DEC);
+  Serial.print(now.minute(), DEC);
+  if ((now.hour() == 01) and (now.minute() == 10)){
+    digitalWrite(CH3, 0);
+    lampStatus = 1;
+  } 
+  else if ((now.hour() == 01) and (now.minute() == 20) and lampStatus == 1) {
+    digitalWrite(CH3, 1);
+    lampStatus = 0;
+  }
   int t = sht31.readTemperature();
   int h = sht31.readHumidity();
   // Check SHT31 connection and sent 1 per 10 cycle
@@ -210,7 +221,7 @@ void loop () {
    Serial.println("Failed to read temperature");
   }
 
-  // Check status 
+  // Check status and set variables
   if (message != "") {
     Serial.println(message); //for debug
     humidity(message);
@@ -243,9 +254,6 @@ void loop () {
     setupFan(configs[3]);
   }
 
-
-
-  
   cycle++;
   sendStatus(cycle);
 }
