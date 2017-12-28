@@ -16,7 +16,9 @@ uint32_t refIndex = 0;
 int* currentConfig;
 int currentConfigIndex = 0;
 int cycle = 0;
-int lampStatus = 0;
+int hr;
+int mn;
+
 String newMessage;
 // Default status
 String humMode = "hy0";
@@ -44,7 +46,12 @@ void setupFan(int* currentConfig) {
     refTime = currentTime;
   }
   digitalWrite(CH1, currentVoltage);
-  myNextion.setComponentText("other.v_stat", "on");
+  if (currentVoltage == 0){
+    myNextion.setComponentText("other.v_stat", "on");
+  }
+  else if (currentVoltage == 1) {
+    myNextion.setComponentText("other.v_stat", "off");
+  }
 }
 
 void humidity(String str) {
@@ -52,21 +59,21 @@ void humidity(String str) {
     humMode = "hy0";
     currentHum = 65;
     myNextion.setComponentText("other.hy_txt", String(humMode));
-    Serial.println(humMode);//for debug
+    //Serial.println(humMode);//for debug
     return;
   }
   if (str == "68 49,0,0") {
     humMode = "hy1";
-    currentHum = 80;
+    currentHum = 78;
     myNextion.setComponentText("other.hy_txt", String(humMode));
-    Serial.println(humMode);//for debug
+    //Serial.println(humMode);//for debug
     return;
   }
   if (str == "68 50,0,0") {
     humMode = "hy2";
     currentHum = 0;
     myNextion.setComponentText("other.hy_txt", String(humMode));
-    Serial.println(humMode);//for debug
+    //Serial.println(humMode);//for debug
     return;
   }
 }
@@ -75,25 +82,25 @@ void ventilation(String str) {
   if (str == "vt0") {
     ventMode = "vt0";
     myNextion.setComponentText("other.vt_txt", String(ventMode));
-    Serial.println(ventMode);//for debug
+    //Serial.println(ventMode);//for debug
     return;
   }
   if (str == "vt1") {
     ventMode = "vt1";
     myNextion.setComponentText("other.vt_txt", String(ventMode));
-    Serial.println(ventMode);//for debug
+    //Serial.println(ventMode);//for debug
     return;
   }
   if (str == "vt2") {
     ventMode = "vt2";
     myNextion.setComponentText("other.vt_txt", String(ventMode));
-    Serial.println(ventMode);//for debug
+    //Serial.println(ventMode);//for debug
     return;
   }
   if (str == "vt4") {
     ventMode = "vt4";
     myNextion.setComponentText("other.vt_txt", String(ventMode));
-    Serial.println(ventMode);//for debug
+    //Serial.println(ventMode);//for debug
     return;
   }
 }
@@ -102,31 +109,35 @@ void lamp(String str) {
   if (str == "lt0") {
     lampMode = "lt0";
     myNextion.setComponentText("other.lt_txt", String(lampMode));
-    Serial.println(lampMode);//for debug
+    //Serial.println(lampMode);//for debug
     return;
   }
   if (str == "lt1") {
     lampMode = "lt1";
     digitalWrite(CH3, 0);
     myNextion.setComponentText("other.lt_txt", String(lampMode));
-    Serial.println(lampMode);//for debug
+    //Serial.println(lampMode);//for debug
     return;
   }
   if (str == "lt2") {
     lampMode = "lt2";
     digitalWrite(CH3, 1);
     myNextion.setComponentText("other.lt_txt", String(lampMode));
-    Serial.println(lampMode);//for debug
+    //Serial.println(lampMode);//for debug
     return;
   }
 }
 
-void sendStatus(int i) {
+void sendStatus(int i, int h, int m) {
   if ( i == 3) {
     myNextion.setComponentText("other.hy_txt", String(humMode));
   }
   else if ( i == 5 ) {
     myNextion.setComponentText("other.vt_txt", String(ventMode));
+  }
+  else if ( i == 6 ) {
+    myNextion.setComponentText("other.hr", String(h));
+    myNextion.setComponentText("other.mn", String(m));
   }
   else if ( i == 7 ) {
     myNextion.setComponentText("other.lt_txt", String(lampMode));
@@ -175,7 +186,7 @@ void setup() {
   }
   else {
     Serial.println("RTC/SHT31 --- OK");
-    rtc.adjust(DateTime(2017, 12, 5, 17, 21, 0));
+    //rtc.adjust(DateTime(2017, 12, 28, 20, 18, 30));
   }
 
   // init vent configs
@@ -200,15 +211,19 @@ void loop () {
   delay(1000);
   // INIT
   DateTime now = rtc.now();
-  Serial.println(now.hour(), DEC);
-  Serial.println(now.minute(), DEC);
-  if ((now.hour() == 01) and (now.minute() == 10)){
+  Serial.print(now.hour(), DEC);
+  Serial.print(":");
+  Serial.print(now.minute(), DEC);
+  Serial.print(":");
+  Serial.println(now.second(), DEC);
+  hr = now.hour();
+  mn = now.minute();
+  if ((now.hour() == 0) and (now.minute() == 30) and (lampMode == "lt0")){
     digitalWrite(CH3, 0);
-    lampStatus = 1;
-  } 
-  else if ((now.hour() == 01) and (now.minute() == 20) and lampStatus == 1) {
+  }
+  else if ((now.hour() == 0) and (now.minute() == 35)) {
     digitalWrite(CH3, 1);
-    lampStatus = 0;
+    lampMode = "lt0";
   }
   int t = sht31.readTemperature();
   int h = sht31.readHumidity();
@@ -224,9 +239,9 @@ void loop () {
   String message = myNextion.listen(); //check for message
   if(message != ""){ // if a message is received...
     newMessage=message;
-    Serial.println(message); //...print it out
+    //Serial.println(message); //...print it out
   }
-  Serial.println(newMessage);
+  //Serial.println(newMessage);
 
     humidity(newMessage);
     ventilation(newMessage);
@@ -254,9 +269,9 @@ void loop () {
   else if (ventMode == "vt4"){
     int currentConfigIndex = 0;
     uint32_t refIndex = 0;
+    myNextion.setComponentText("other.v_stat", "off");
     setupFan(configs[3]);
   }
-
   cycle++;
-  sendStatus(cycle);
+  sendStatus(cycle, hr, mn);
 }
